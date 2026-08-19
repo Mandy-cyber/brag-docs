@@ -43,6 +43,14 @@ describe("enhance", () => {
     expect(provider.complete).toHaveBeenCalledTimes(2);
   });
 
+  it("rejects and retries when a field is a serialized JSON blob instead of plain text", async () => {
+    const corrupted = { title: '{"title":"x","description":"y","impacts":[]}' };
+    const provider = providerReturning(corrupted, { title: "Clean title on retry" });
+    const result = await enhance(provider, "raw input", schema, contextPack);
+    expect(result).toEqual({ title: "Clean title on retry" });
+    expect(provider.complete).toHaveBeenCalledTimes(2);
+  });
+
   it("treats a provider throwing (e.g. a refusal) the same as invalid output", async () => {
     const complete = vi.fn().mockRejectedValue(new Error("Claude declined to respond."));
     const provider: AiProvider = { name: "mock", complete };

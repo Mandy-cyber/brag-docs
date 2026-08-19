@@ -4,10 +4,16 @@ import { enhance } from "../core/ai/enhance.js";
 import {
   entryEnhancementContextPack,
   executiveSummaryContextPack,
+  learnedEnhancementContextPack,
+  feedbackEnhancementContextPack,
   EnhancementResultSchema,
   ExecutiveSummaryResultSchema,
+  LearnedEnhancementResultSchema,
+  FeedbackEnhancementResultSchema,
   type EnhancementResult,
   type ExecutiveSummaryResult,
+  type LearnedEnhancementResult,
+  type FeedbackEnhancementResult,
 } from "../core/ai/context-packs/index.js";
 import { ConfigError } from "../core/errors.js";
 
@@ -48,6 +54,34 @@ export async function enhanceEntry(
 ): Promise<EnhancementResult> {
   const provider = createAiProvider(providerName, config);
   return enhance(provider, rawInput, EnhancementResultSchema, entryEnhancementContextPack);
+}
+
+export async function enhanceLearned(
+  rawInput: string,
+  providerName: AiProviderName,
+  config: BragConfig,
+): Promise<LearnedEnhancementResult> {
+  const provider = createAiProvider(providerName, config);
+  return enhance(
+    provider,
+    rawInput,
+    LearnedEnhancementResultSchema,
+    learnedEnhancementContextPack,
+  );
+}
+
+export async function enhanceFeedback(
+  rawInput: string,
+  providerName: AiProviderName,
+  config: BragConfig,
+): Promise<FeedbackEnhancementResult> {
+  const provider = createAiProvider(providerName, config);
+  return enhance(
+    provider,
+    rawInput,
+    FeedbackEnhancementResultSchema,
+    feedbackEnhancementContextPack,
+  );
 }
 
 export async function generateExecutiveSummary(
