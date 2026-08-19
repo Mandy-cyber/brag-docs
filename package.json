@@ -1,0 +1,50 @@
+{
+  "name": "brag-docs",
+  "version": "0.1.0",
+  "description": "CLI for maintaining a running brag document of professional accomplishments",
+  "type": "module",
+  "bin": {
+    "brag": "./dist/cli/index.js"
+  },
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.117.1",
+    "@clack/prompts": "^1.7.0",
+    "commander": "^15.0.0",
+    "mdast-util-to-markdown": "^2.1.2",
+    "mdast-util-to-string": "^4.0.0",
+    "md-to-pdf": "^5.2.5",
+    "ollama": "^0.6.3",
+    "openai": "^7.5.0",
+    "picocolors": "^1.1.1",
+    "remark-parse": "^11.0.0",
+    "simple-git": "^3.36.0",
+    "unified": "^11.0.5",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^26.2.0",
+    "eslint": "^10.8.1",
+    "prettier": "^3.9.6",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.67.0",
+    "vitest": "^4.1.11"
+  }
+}
