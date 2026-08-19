@@ -31,6 +31,13 @@ function titleHeading(title: string, link: string | null): string {
   return link ? `[${title}](${link})` : title;
 }
 
+/** Same as titleHeading, but as raw HTML for use inside table cells (marked doesn't reprocess markdown inside raw HTML blocks). */
+function titleCell(title: string, link: string | null): string {
+  if (!link) return title;
+  const href = esc(link).replace(/"/g, "&quot;");
+  return `<a href="${href}">${title}</a>`;
+}
+
 function formatImpact(impact: Impact): string {
   if (impact.metrics.length === 0) return esc(impact.statement);
   const metrics = impact.metrics.map((m) => `${m.value} ${esc(m.unit)}`).join(", ");
@@ -70,12 +77,26 @@ function formatBragEntry(entry: BragEntry): string {
   return lines.join("\n").trim();
 }
 
-function formatLearnedEntry(entry: LearnedEntry): string {
-  const lines = [`### ${titleHeading(esc(entry.title), entry.link)}`, ""];
-  if (entry.description.length > 0) {
-    lines.push(esc(entry.description));
-  }
-  return lines.join("\n").trim();
+function htmlTable(className: string, headers: string[], rows: string[][]): string {
+  const headRow = headers.map((h) => `<th>${h}</th>`).join("");
+  const bodyRows = rows
+    .map((cells) => `<tr>${cells.map((c) => `<td>${c}</td>`).join("")}</tr>`)
+    .join("\n");
+  return (
+    `<table class="${className}">\n<thead><tr>${headRow}</tr></thead>\n` +
+    `<tbody>\n${bodyRows}\n</tbody>\n</table>`
+  );
+}
+
+function renderLearnedSection(learned: LearnedEntry[]): string {
+  if (learned.length === 0) return "";
+  const rows = learned.map((entry) => [
+    entry.date,
+    titleCell(esc(entry.title), entry.link),
+    esc(entry.category),
+    entry.description.length > 0 ? esc(entry.description) : "",
+  ]);
+  return htmlTable("learned-table", ["Date", "Title", "Category", "Notes"], rows);
 }
 
 function formatFeedbackBullet(entry: FeedbackEntry): string {
@@ -86,18 +107,30 @@ function formatFeedbackBullet(entry: FeedbackEntry): string {
   return lines.join("\n");
 }
 
-const FEEDBACK_SENTIMENT_HEADINGS: Record<FeedbackEntry["sentiment"], string> = {
-  positive: "Positive",
-  constructive: "Constructive",
-};
+function renderConstructiveFeedbackTable(entries: FeedbackEntry[]): string {
+  const rows = entries.map((entry) => [
+    esc(entry.content),
+    entry.source ? esc(entry.source) : "",
+    entry.howAddressed ? esc(entry.howAddressed) : "",
+  ]);
+  return htmlTable(
+    "feedback-table",
+    ["Feedback received", "Received by", "How it's been addressed"],
+    rows,
+  );
+}
 
 function renderFeedbackSection(feedback: FeedbackEntry[]): string {
   const parts: string[] = [];
-  for (const sentiment of ["positive", "constructive"] as const) {
-    const entries = feedback.filter((entry) => entry.sentiment === sentiment);
-    if (entries.length === 0) continue;
-    parts.push(`### ${FEEDBACK_SENTIMENT_HEADINGS[sentiment]}`);
-    parts.push(entries.map(formatFeedbackBullet).join("\n"));
+  const positive = feedback.filter((entry) => entry.sentiment === "positive");
+  if (positive.length > 0) {
+    parts.push("### Positive");
+    parts.push(positive.map(formatFeedbackBullet).join("\n"));
+  }
+  const constructive = feedback.filter((entry) => entry.sentiment === "constructive");
+  if (constructive.length > 0) {
+    parts.push("### Constructive");
+    parts.push(renderConstructiveFeedbackTable(constructive));
   }
   return parts.join("\n\n").trim();
 }
@@ -170,8 +203,7 @@ export function renderMarkdown(doc: BragDoc, config: BragConfig): string {
         break;
       }
       case "learned": {
-        const body = doc.learned.map(formatLearnedEntry).join("\n\n");
-        const found = section(SECTION_HEADINGS.learned, body);
+        const found = section(SECTION_HEADINGS.learned, renderLearnedSection(doc.learned));
         if (found) rendered.push(found);
         break;
       }

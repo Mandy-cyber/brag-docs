@@ -70,4 +70,25 @@ code {
   color: #5b6472;
   margin-bottom: 0.6em;
 }
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.5em 0 1em;
+  font-size: 0.92em;
+}
+th, td {
+  text-align: left;
+  padding: 0.45em 0.6em;
+  border-bottom: 1px solid #e4e7ec;
+  vertical-align: top;
+}
+th {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  font-weight: 600;
+  font-size: 0.85em;
+  color: #5b6472;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-bottom: 2px solid #d0d5dd;
+}
 `;

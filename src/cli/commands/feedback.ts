@@ -35,9 +35,9 @@ async function collectInteractively(): Promise<Omit<FeedbackEntry, "id" | "title
   });
   const date = await promptText({ message: "Date (YYYY-MM-DD)", defaultValue: today() });
   const source = await promptText({
-    message: "Who/where was this from?",
+    message: "Who was this from?",
     defaultValue: "",
-    placeholder: "e.g. Manager, Q1 1:1",
+    placeholder: "e.g. Jane Doe",
   });
   const content = await promptText({ message: "What was the feedback?" });
   const howAddressed =
@@ -91,7 +91,7 @@ export function registerFeedbackCommand(program: Command): void {
     .description("Add a feedback entry")
     .option("--date <date>", "date (YYYY-MM-DD)")
     .option("--sentiment <sentiment>", "positive or constructive")
-    .option("--source <text>", "who/where the feedback came from")
+    .option("--source <text>", "who the feedback came from")
     .option("--content <text>", "the feedback itself")
     .option("--how-addressed <text>", "how it was addressed (constructive feedback)")
     .option("--link <url>", "link to additional context")
