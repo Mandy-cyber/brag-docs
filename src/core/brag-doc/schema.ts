@@ -83,7 +83,7 @@ export const BragEntrySchema = z.object({
   type: BragTypeSchema,
   impacts: z.array(ImpactSchema).min(1),
   collaborators: z.array(z.string().min(1)),
-  link: z.url().nullable(),
+  link: z.url({ protocol: /^https?$/ }).nullable(),
   description: z.string(),
 });
 
@@ -105,7 +105,7 @@ export const FeedbackEntrySchema = z.object({
     .min(1)
     .nullable()
     .describe("Recommended for constructive feedback; not required."),
-  link: z.url().nullable(),
+  link: z.url({ protocol: /^https?$/ }).nullable(),
 });
 
 /** Categories for a "what I've learned" entry. */
@@ -119,7 +119,7 @@ export const LearnedEntrySchema = z.object({
   title: z.string().min(1),
   date: z.iso.date(),
   category: LearnedCategorySchema,
-  link: z.url().nullable(),
+  link: z.url({ protocol: /^https?$/ }).nullable(),
   description: z.string(),
 });
 
