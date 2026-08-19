@@ -1,6 +1,7 @@
 import path from "node:path";
 import { promises as fs } from "node:fs";
 import type { Command } from "commander";
+import { getProperty, setProperty } from "dot-prop";
 import { BragConfigSchema } from "../../core/config/schema.js";
 import { findConfigPath, loadConfig } from "../../core/config/loader.js";
 import { writeFileAtomic } from "../../core/utils/fs.js";
@@ -29,25 +30,15 @@ async function readRawConfig(configPath: string): Promise<Record<string, unknown
   }
 }
 
-function getPath(obj: unknown, dottedPath: string): unknown {
-  return dottedPath.split(".").reduce<unknown>((acc, key) => {
-    if (acc === null || typeof acc !== "object") return undefined;
-    return (acc as Record<string, unknown>)[key];
-  }, obj);
-}
-
-function setPath(obj: Record<string, unknown>, dottedPath: string, value: unknown): void {
-  const keys = dottedPath.split(".");
-  let target = obj;
-  for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i]!;
-    const next = target[key];
-    if (typeof next !== "object" || next === null) {
+function setConfigPath(draft: Record<string, unknown>, dottedPath: string, value: unknown): void {
+  const lastDot = dottedPath.lastIndexOf(".");
+  if (lastDot !== -1) {
+    const parent = getProperty(draft, dottedPath.slice(0, lastDot));
+    if (typeof parent !== "object" || parent === null) {
       throw new ConfigError(`No such config path: ${dottedPath}`);
     }
-    target = next as Record<string, unknown>;
   }
-  target[keys.at(-1)!] = value;
+  setProperty(draft, dottedPath, value);
 }
 
 /** Parses a CLI value string as JSON when possible, else keeps it as a plain string. */
@@ -68,7 +59,7 @@ export function registerConfigCommand(program: Command): void {
     .action(async (key: string, _opts: unknown, cmd: Command) => {
       const globals = getGlobalOptions(cmd);
       const loaded = await loadConfig(globals.config);
-      const value = getPath(loaded, key);
+      const value = getProperty(loaded, key);
       if (value === undefined) {
         throw new ConfigError(`No such config path: ${key}`);
       }
@@ -95,7 +86,7 @@ export function registerConfigCommand(program: Command): void {
       }
 
       const draft = await readRawConfig(configPath);
-      setPath(draft, key, coerceValue(value));
+      setConfigPath(draft, key, coerceValue(value));
 
       const result = BragConfigSchema.safeParse(draft);
       if (!result.success) {

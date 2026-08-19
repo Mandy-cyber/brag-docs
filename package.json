@@ -25,6 +25,7 @@
     "@anthropic-ai/sdk": "^0.117.1",
     "@clack/prompts": "^1.7.0",
     "commander": "^15.0.0",
+    "dot-prop": "^10.2.0",
     "md-to-pdf": "^5.2.5",
     "mdast-util-to-markdown": "^2.1.2",
     "mdast-util-to-string": "^4.0.0",
